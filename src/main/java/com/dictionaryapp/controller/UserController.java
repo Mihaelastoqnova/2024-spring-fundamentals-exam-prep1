@@ -2,7 +2,7 @@ package com.dictionaryapp.controller;
 
 
 import com.dictionaryapp.model.dto.UserRegisterDTO;
-import com.dictionaryapp.service.UserSrvice;
+import com.dictionaryapp.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
@@ -14,10 +14,10 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @Controller
 public class UserController {
 
-    private UserSrvice userSrvice;
+    private UserService userService;
 
-    public UserController(UserSrvice userSrvice) {
-        this.userSrvice = userSrvice;
+    public UserController(UserService userService) {
+        this.userService = userService;
     }
 
     @ModelAttribute("registerData")
@@ -38,7 +38,7 @@ public class UserController {
                              BindingResult bindingResult,
                              RedirectAttributes redirectAttributes) {
 
-        if(bindingResult.hasErrors()){
+        if(bindingResult.hasErrors() || !userService.register(data)){
             //Return errors
             redirectAttributes.addFlashAttribute("registerData", data);
             redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.registerData", bindingResult);
@@ -46,7 +46,10 @@ public class UserController {
             return "redirect:/register";
 
         }
+
+
         //Validate Data
+
         //Register user
 
         return "redirect:/login";
