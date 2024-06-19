@@ -1,6 +1,7 @@
 package com.dictionaryapp.controller;
 
 
+import com.dictionaryapp.model.dto.UserLoginDTO;
 import com.dictionaryapp.model.dto.UserRegisterDTO;
 import com.dictionaryapp.service.UserService;
 import jakarta.validation.Valid;
@@ -14,7 +15,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @Controller
 public class UserController {
 
-    private UserService userService;
+    private final UserService userService;
 
     public UserController(UserService userService) {
         this.userService = userService;
@@ -22,8 +23,11 @@ public class UserController {
 
     @ModelAttribute("registerData")
     public UserRegisterDTO createEmptyDTO() {
-
         return new UserRegisterDTO();
+    }
+    @ModelAttribute("loginData")
+    public UserLoginDTO loginData() {
+        return new UserLoginDTO();
     }
 
     @GetMapping("/register")
@@ -47,11 +51,38 @@ public class UserController {
 
         }
 
-
         //Validate Data
 
         //Register user
 
         return "redirect:/login";
+    }
+
+    @GetMapping("/login")
+    public String viewLogin() {
+
+
+        return "login";
+    }
+
+    @PostMapping("/login")
+    public String doLogin(@Valid UserLoginDTO data, BindingResult bindingResult, RedirectAttributes redirectAttributes) {
+        if(bindingResult.hasErrors()){
+            redirectAttributes.addFlashAttribute("loginData", data);
+            redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.loginData", bindingResult);
+
+            return "redirect:/login";
+        }
+
+        boolean success = userService.login(data);
+
+        if(!success) {
+            redirectAttributes.addFlashAttribute("loginData", data);
+            redirectAttributes.addFlashAttribute("userPassMismatch", true);
+
+            return "redirect:/login";
+        }
+
+        return "redirect:/home";
     }
 }
